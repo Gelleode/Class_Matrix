@@ -91,44 +91,38 @@ public class Matrix
         return ret.ToString();
     }
 
-    public static dynamic Sum(Matrix A, Matrix B)
+    public static Matrix Sum(Matrix A, Matrix B)
     {
-        if (A.CountColumn == B.CountColumn & A.CountRow == B.CountRow)
-        {
-            Matrix C = new(A.CountRow, A.CountColumn);
-            for (int i = 0; i < C.CountRow; i++)
-                for (int j = 0; j < C.CountColumn; j++)
-                    C[i, j] = A[i, j] + B[i, j];
-            return C;
-        }
-        else return "Can't add these matrices";
+        if (A.CountColumn != B.CountColumn || A.CountRow != B.CountRow)
+            throw new Exception("Matrices should have equal size");
+        Matrix C = new(A.CountRow, A.CountColumn);
+        for (int i = 0; i < C.CountRow; i++)
+            for (int j = 0; j < C.CountColumn; j++)
+                C[i, j] = A[i, j] + B[i, j];
+        return C;
     }
 
-    public static dynamic Subtract(Matrix A, Matrix B)
+    public static Matrix Subtract(Matrix A, Matrix B)
     {
-        if (A.CountColumn == B.CountColumn & A.CountRow == B.CountRow)
-        {
-            Matrix C = new(A.CountRow, A.CountColumn);
-            for (int i = 0; i < C.CountRow; i++)
-                for (int j = 0; j < C.CountColumn; j++)
-                    C[i, j] = A[i, j] - B[i, j];
-            return C;
-        }
-        else return "Can't subtract these matrices";
+        if (A.CountColumn != B.CountColumn || A.CountRow != B.CountRow)
+            throw new Exception("Matrices should have equal size");
+        Matrix C = new(A.CountRow, A.CountColumn);
+        for (int i = 0; i < C.CountRow; i++)
+            for (int j = 0; j < C.CountColumn; j++)
+                C[i, j] = A[i, j] - B[i, j];
+        return C;
     }
 
-    public static dynamic Multiply(Matrix A, Matrix B)
+    public static Matrix Multiply(Matrix A, Matrix B)
     {
-        if (A.CountColumn == B.CountRow)
-        {
-            Matrix C = new(A.CountRow, B.CountColumn);
-            for (int i = 0; i < C.CountRow; i++)
-                for (int j = 0; j < C.CountColumn; j++)
-                    for (int k = 0; k < B.CountRow; k++)
-                        C[i, j] += A[i, k] * B[k, j];
-            return C;
-        }
-        else return "Can't multiply these matrices";
+        if (A.CountColumn != B.CountRow)
+            throw new Exception("There should be as many rows in the first matrix as there are columns in the second one");
+        Matrix C = new(A.CountRow, B.CountColumn);
+        for (int i = 0; i < C.CountRow; i++)
+            for (int j = 0; j < C.CountColumn; j++)
+                for (int k = 0; k < B.CountRow; k++)
+                    C[i, j] += A[i, k] * B[k, j];
+        return C;
     }
 
     public static Matrix MultiplyByNumber(Matrix A, int b)
@@ -142,6 +136,10 @@ public class Matrix
 
     public static Matrix GetMinor(Matrix A, int row, int column)
     {
+        if (A.CountRow != A.CountColumn)
+            throw new Exception("Matrix should be square");
+        if (A.CountRow == 1)
+            throw new Exception("Matrix should be bigger than 1x1");
         Matrix result = new Matrix(A.CountRow-1, A.CountColumn-1);
         int m = 0, k;
         for (int i = 0; i < A.CountRow; i++)
@@ -160,6 +158,8 @@ public class Matrix
 
     public static double GetDeterminant(Matrix A)
     {
+        if (A.CountRow != A.CountColumn)
+            throw new Exception("Matrix should be square");
         double Determinant = 0;
         if (A.CountRow == 1)
             return A[0, 0];
@@ -183,22 +183,22 @@ public class Matrix
         return B;
     }
 
-    public static dynamic operator *(Matrix A, Matrix B)
+    public static Matrix operator *(Matrix A, Matrix B)
     {
         return Multiply(A, B);
     }
 
-    public static dynamic operator *(Matrix A, int b)
+    public static Matrix operator *(Matrix A, int b)
     {
         return MultiplyByNumber(A, b);
     }
 
-    public static dynamic operator +(Matrix A, Matrix B)
+    public static Matrix operator +(Matrix A, Matrix B)
     {
         return Sum(A, B);
     }
 
-    public static dynamic operator -(Matrix A, Matrix B)
+    public static Matrix operator -(Matrix A, Matrix B)
     {
         return Subtract(A, B);
     }
