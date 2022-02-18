@@ -3,27 +3,6 @@ using System.Text;
 
 namespace MatrixCalculations;
 
-public static class Extensions
-{
-    public static double GetMin(this double[,] matrix)
-    {
-        double value = double.MaxValue;
-        for (int i = 0; i < matrix.GetLength(0); i++)
-            for (int j = 0; j < matrix.GetLength(1); j++)
-                if (matrix[i, j] < value)
-                    value = matrix[i, j];
-        return value;
-    }
-    public static double GetMax(this double[,] matrix)
-    {
-        double value = double.MinValue;
-        for (int i = 0; i < matrix.GetLength(0); i++)
-            for (int j = 0; j < matrix.GetLength(1); j++)
-                if (matrix[i, j] > value)
-                    value = matrix[i, j];
-        return value;
-    }
-}
 public class Matrix
 {
     public double[,] matrix = null;
@@ -71,10 +50,10 @@ public class Matrix
     {
         StringBuilder ret = new();
         int SpaceAling;
-        if (Convert.ToString(matrix.GetMax()).Length > Convert.ToString(matrix.GetMin()).Length)
-            SpaceAling = Convert.ToString(matrix.GetMax()).Length;
+        if (Convert.ToString(GetMax).Length > Convert.ToString(GetMin).Length)
+            SpaceAling = Convert.ToString(GetMax).Length;
         else
-            SpaceAling = Convert.ToString(matrix.GetMin()).Length;
+            SpaceAling = Convert.ToString(GetMin).Length;
         if (matrix == null) return ret.ToString();
         for (int i = 0; i < CountRow; i++)
         {
@@ -91,7 +70,7 @@ public class Matrix
         return ret.ToString();
     }
 
-    public static Matrix Sum(Matrix A, Matrix B)
+    private static Matrix Sum(Matrix A, Matrix B)
     {
         if (A.CountColumn != B.CountColumn || A.CountRow != B.CountRow)
             throw new Exception("Matrices should have equal size");
@@ -102,7 +81,7 @@ public class Matrix
         return C;
     }
 
-    public static Matrix Subtract(Matrix A, Matrix B)
+    private static Matrix Subtract(Matrix A, Matrix B)
     {
         if (A.CountColumn != B.CountColumn || A.CountRow != B.CountRow)
             throw new Exception("Matrices should have equal size");
@@ -113,7 +92,7 @@ public class Matrix
         return C;
     }
 
-    public static Matrix Multiply(Matrix A, Matrix B)
+    private static Matrix Multiply(Matrix A, Matrix B)
     {
         if (A.CountColumn != B.CountRow)
             throw new Exception("There should be as many rows in the first matrix as there are columns in the second one");
@@ -125,7 +104,7 @@ public class Matrix
         return C;
     }
 
-    public static Matrix MultiplyByNumber(Matrix A, int b)
+    private static Matrix MultiplyByNumber(Matrix A, int b)
     {
         Matrix B = new(A.CountRow, A.CountColumn);
         for (int i = 0; i < A.CountRow; i++)
@@ -162,7 +141,7 @@ public class Matrix
             throw new Exception("Matrix should be square");
         double Determinant = 0;
         if (A.CountRow == 1)
-            return A[0, 0];
+              return A[0, 0];
         else if (A.CountRow == 2)
             return A[0, 0] * A[1, 1] - A[1, 0] * A[0, 1];
         int j = 0;
@@ -189,6 +168,10 @@ public class Matrix
     }
 
     public static Matrix operator *(Matrix A, int b)
+    {
+        return MultiplyByNumber(A, b);
+    }
+    public static Matrix operator *(int b, Matrix A)
     {
         return MultiplyByNumber(A, b);
     }
