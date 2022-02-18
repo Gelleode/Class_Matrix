@@ -15,7 +15,7 @@ public class Matrix
         {
             double value = double.MinValue;
             for (int i = 0; i < CountColumn; i++)
-                for (int j = 0; j < CountRow; j++) //
+                for (int j = 0; j < CountRow; j++)
                     if (matrix[i, j] > value)
                         value = matrix[i, j];
             return value;
