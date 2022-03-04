@@ -7,25 +7,32 @@ class Program
     static void Main()
     {
         Matrix m1 = new(3, 3);
-        FillRandom(ref m1, 0, 10);
+        m1[0,0] = 1; m1[0,1] = -1; m1[0,2] = 1;
+        m1[1,0] = 2; m1[1,1] = 1; m1[1,2] = 1;
+        m1[2,0] = 1; m1[2,1] = 1; m1[2,2] = 2;
         Console.WriteLine();
 
         Matrix m2 = new(3, 3);
         FillRandom(ref m2, 0, 10);
 
         Console.WriteLine(m1);
-        Console.WriteLine($"m1 Minor from 3 3\n{Matrix.GetMinor(m1, 2, 2)}");
-        Console.WriteLine($"m1 determinant - \n{Matrix.GetDeterminant(m1)}");
+        Console.WriteLine($"m1 inverse\n{Matrix.InverseMatrix(m1)}");
+        Console.WriteLine($"m1 Minor from 3 3\n{Matrix.Minor(m1, 2, 2)}");
+        Console.WriteLine($"m1 determinant - \n{Matrix.Determinant(m1)}");
         Console.WriteLine();
         Console.WriteLine($"m1 multiply 2\n{m1 * 2}");
         Console.WriteLine();
-        Console.WriteLine($"m1*m2 \n{m1 * m2}");
+        Console.WriteLine($"m1*m1 \n{m1 * m1}");
+        Console.WriteLine();
+        Console.WriteLine($"m1^2 \n{Matrix.Pow(m1, 10)}");
         Console.WriteLine();
         Console.WriteLine($"m1 transpose \n{Matrix.Transponse(m1)}");
         Console.WriteLine();
         Console.WriteLine($"m1 + m2\n{m2 + m1}");
         Console.WriteLine();
         Console.WriteLine($"m2 - m1\n{m2 - m1}");
+        Console.WriteLine();
+        Console.WriteLine($"m1 * inverse M1\n{m1 * Matrix.InverseMatrix(m1)}");
         Console.WriteLine();
         Print(m1, m2, m1 * m2);
         Console.Read();

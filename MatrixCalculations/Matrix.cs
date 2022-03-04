@@ -5,15 +5,15 @@ namespace MatrixCalculations;
 
 public class Matrix
 {
-    public double[,] matrix = null;
+    public decimal[,] matrix = null;
 
     public int CountColumn { get; private set; }
     public int CountRow { get; private set; }
-    public double GetMax
+    public decimal GetMax
     {
         get
         {
-            double value = double.MinValue;
+            decimal value = decimal.MinValue;
             for (int i = 0; i < CountColumn; i++)
                 for (int j = 0; j < CountRow; j++)
                     if (matrix[i, j] > value)
@@ -21,11 +21,11 @@ public class Matrix
             return value;
         }
     }
-    public double GetMin
+    public decimal GetMin
     {
         get
         {
-            double value = double.MaxValue;
+            decimal value = decimal.MaxValue;
             for (int i = 0; i < CountColumn; i++)
                 for (int j = 0; j < CountRow; j++)
                     if (matrix[i, j] < value)
@@ -35,20 +35,19 @@ public class Matrix
     }
     public Matrix(int x = 1, int y = 1)
     {
-        matrix = new double[x, y];
+        matrix = new decimal[x, y];
 
         CountColumn = y;
         CountRow = x;
     }
-
-    public double this[int x, int y]
+    public decimal this[int x, int y]
     {
         get { return matrix[x, y]; }
         set { matrix[x, y] = value; }
     }
     public override string ToString()
     {
-        StringBuilder ret = new();
+        StringBuilder ret = new StringBuilder();
         int SpaceAling;
         if (Convert.ToString(GetMax).Length > Convert.ToString(GetMin).Length)
             SpaceAling = Convert.ToString(GetMax).Length;
@@ -74,7 +73,7 @@ public class Matrix
     {
         if (A.CountColumn != B.CountColumn || A.CountRow != B.CountRow)
             throw new Exception("Matrices should have equal size");
-        Matrix C = new(A.CountRow, A.CountColumn);
+        Matrix C = new Matrix(A.CountRow, A.CountColumn);
         for (int i = 0; i < C.CountRow; i++)
             for (int j = 0; j < C.CountColumn; j++)
                 C[i, j] = A[i, j] + B[i, j];
@@ -85,7 +84,7 @@ public class Matrix
     {
         if (A.CountColumn != B.CountColumn || A.CountRow != B.CountRow)
             throw new Exception("Matrices should have equal size");
-        Matrix C = new(A.CountRow, A.CountColumn);
+        Matrix C = new Matrix(A.CountRow, A.CountColumn);
         for (int i = 0; i < C.CountRow; i++)
             for (int j = 0; j < C.CountColumn; j++)
                 C[i, j] = A[i, j] - B[i, j];
@@ -96,7 +95,7 @@ public class Matrix
     {
         if (A.CountColumn != B.CountRow)
             throw new Exception("There should be as many rows in the first matrix as there are columns in the second one");
-        Matrix C = new(A.CountRow, B.CountColumn);
+        Matrix C = new Matrix(A.CountRow, B.CountColumn);
         for (int i = 0; i < C.CountRow; i++)
             for (int j = 0; j < C.CountColumn; j++)
                 for (int k = 0; k < B.CountRow; k++)
@@ -106,14 +105,42 @@ public class Matrix
 
     private static Matrix MultiplyByNumber(Matrix A, int b)
     {
-        Matrix B = new(A.CountRow, A.CountColumn);
+        Matrix B = new Matrix(A.CountRow, A.CountColumn);
         for (int i = 0; i < A.CountRow; i++)
             for (int j = 0; j < A.CountColumn; j++)
                 B[i, j] = A[i, j] * b;
         return B;
     }
 
-    public static Matrix GetMinor(Matrix A, int row, int column)
+    private static Matrix MultiplyByNumber(Matrix A, decimal b)
+    {
+        Matrix B = new Matrix(A.CountRow, A.CountColumn);
+        for (int i = 0; i < A.CountRow; i++)
+            for (int j = 0; j < A.CountColumn; j++)
+                B[i, j] = A[i, j] * b;
+        return B;
+    }
+    
+    private static Matrix MultiplyByNumber(Matrix A, double b)
+    {
+        Matrix B = new Matrix(A.CountRow, A.CountColumn);
+        for (int i = 0; i < A.CountRow; i++)
+            for (int j = 0; j < A.CountColumn; j++)
+                B[i, j] = A[i, j] * (decimal)b;
+        return B;
+    }
+
+    public static Matrix Pow(Matrix A, int n)
+    {
+        if (n < 1)
+            throw new Exception("Power should be bigger than one");
+        Matrix B = A;
+        for (int i = 0; i < n - 1; i++)
+            A *= B;
+        return A;
+    }
+
+    public static Matrix Minor(Matrix A, int row, int column)
     {
         if (A.CountRow != A.CountColumn)
             throw new Exception("Matrix should be square");
@@ -134,12 +161,24 @@ public class Matrix
         }
         return result;
     }
-
-    public static double GetDeterminant(Matrix A)
+    public static Matrix InverseMatrix(Matrix A)
+    {
+        decimal det = Determinant(A);
+        if (det == 0)
+            throw new Exception("This matrix can't be inversed");
+        A = Transponse(A);
+        Matrix B = new Matrix(A.CountColumn, A.CountRow);
+        for (int i = 0; i < A.CountRow; i++)
+            for (int j = 0; j < A.CountColumn; j++)
+                B[i,j] = (decimal)Math.Pow(-1, i + j + 2) * Determinant(Minor(A, i, j));
+        A = B * (1 / det);
+        return A;
+    }
+    public static decimal Determinant(Matrix A)
     {
         if (A.CountRow != A.CountColumn)
             throw new Exception("Matrix should be square");
-        double Determinant = 0;
+        decimal Determinant = 0;
         if (A.CountRow == 1)
               return A[0, 0];
         else if (A.CountRow == 2)
@@ -147,15 +186,15 @@ public class Matrix
         int j = 0;
         for (int i = 0; i < A.CountRow; i++)
         {
-            double sign = Math.Pow(-1, i + j + 2);
-            Determinant += A[i, j] * sign * GetDeterminant(GetMinor(A, i, j));
+            int sign = Convert.ToInt32(Math.Pow(-1, i + j + 2));
+            Determinant += A[i, j] * sign * Matrix.Determinant(Minor(A, i, j));
         }
         return Determinant;
     }
 
     public static Matrix Transponse(Matrix A)
     {
-        Matrix B = new(A.CountColumn, A.CountRow);
+        Matrix B = new Matrix(A.CountColumn, A.CountRow);
         for (int i = 0; i < B.CountRow; i++)
             for (int j = 0; j < B.CountColumn; j++)
                 B[i, j] = A[j, i];
@@ -171,7 +210,11 @@ public class Matrix
     {
         return MultiplyByNumber(A, b);
     }
-    public static Matrix operator *(int b, Matrix A)
+    public static Matrix operator *(Matrix A, decimal b)
+    {
+        return MultiplyByNumber(A, b);
+    }
+    public static Matrix operator *(Matrix A, double b)
     {
         return MultiplyByNumber(A, b);
     }
