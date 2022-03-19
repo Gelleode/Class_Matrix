@@ -17,7 +17,7 @@ class Program
 
         Console.WriteLine(m1);
         Console.WriteLine($"m1 inverse\n{Matrix.InverseMatrix(m1)}");
-        Console.WriteLine($"m1 Minor from 3 3\n{Matrix.Minor(m1, 2, 2)}");
+        Console.WriteLine($"m1 Minor from 3 3\n{Matrix.SqrMinor(m1, 2, 2)}");
         Console.WriteLine($"m1 determinant - \n{Matrix.Determinant(m1)}");
         Console.WriteLine();
         Console.WriteLine($"m1 multiply 2\n{m1 * 2}");
