@@ -1,38 +1,42 @@
 ﻿using System;
+using System.Globalization;
 using System.Text;
 
 namespace MatrixCalculations;
 
 public class Matrix
 {
-    public decimal[,] matrix = null;
+    public decimal[,] matrix;
 
     public int CountColumn { get; private set; }
     public int CountRow { get; private set; }
+
     public decimal GetMaxElement
     {
         get
         {
-            decimal value = decimal.MinValue;
-            for (int i = 0; i < CountColumn; i++)
-                for (int j = 0; j < CountRow; j++)
-                    if (matrix[i, j] > value)
-                        value = matrix[i, j];
+            var value = decimal.MinValue;
+            for (var i = 0; i < CountColumn; i++)
+            for (var j = 0; j < CountRow; j++)
+                if (matrix[i, j] > value)
+                    value = matrix[i, j];
             return value;
         }
     }
+
     public decimal GetMinElement
     {
         get
         {
-            decimal value = decimal.MaxValue;
-            for (int i = 0; i < CountColumn; i++)
-                for (int j = 0; j < CountRow; j++)
-                    if (matrix[i, j] < value)
-                        value = matrix[i, j];
+            var value = decimal.MaxValue;
+            for (var i = 0; i < CountColumn; i++)
+            for (var j = 0; j < CountRow; j++)
+                if (matrix[i, j] < value)
+                    value = matrix[i, j];
             return value;
         }
     }
+
     public Matrix(int x = 1, int y = 1)
     {
         matrix = new decimal[x, y];
@@ -40,159 +44,189 @@ public class Matrix
         CountColumn = y;
         CountRow = x;
     }
+
     public decimal this[int x, int y]
     {
-        get { return matrix[x, y]; }
-        set { matrix[x, y] = value; }
+        get => matrix[x, y];
+        set => matrix[x, y] = value;
     }
+
     public override string ToString()
     {
-        StringBuilder ret = new StringBuilder();
-        int SpaceAling;
-        if (Convert.ToString(GetMaxElement).Length > Convert.ToString(GetMinElement).Length)
-            SpaceAling = Convert.ToString(GetMaxElement).Length;
-        else
-            SpaceAling = Convert.ToString(GetMinElement).Length;
+        var ret = new StringBuilder();
+        var spaceAlignment =
+            Convert.ToString(GetMaxElement, CultureInfo.InvariantCulture).Length >
+            Convert.ToString(GetMinElement, CultureInfo.InvariantCulture).Length
+                ? Convert.ToString(GetMaxElement, CultureInfo.InvariantCulture).Length
+                : Convert.ToString(GetMinElement, CultureInfo.InvariantCulture).Length;
         if (matrix == null) return ret.ToString();
-        for (int i = 0; i < CountRow; i++)
+        for (var i = 0; i < CountRow; i++)
         {
-            for (int j = 0; j < CountColumn; j++)
+            if (matrix[i, 0] >= 0)
+                ret.Append(' ');
+            for (var j = 0; j < CountColumn; j++)
             {
-                string ToAppend = Convert.ToString(matrix[i, j]);
-                while (ToAppend.Length < SpaceAling)
-                    ToAppend += ' ';
-                ToAppend += ' ';
-                ret.Append(ToAppend);
+                var toAppend = Convert.ToString(matrix[i, j], CultureInfo.InvariantCulture);
+                while (toAppend.Length != spaceAlignment)
+                    toAppend += ' ';
+                toAppend += ' ';
+
+                if (matrix[i, j] < 0)
+                    toAppend += ' ';
+
+                if (j < CountColumn - 1)
+                    if (matrix[i, j + 1] < 0)
+                        toAppend = toAppend.Remove(toAppend.Length - 1, 1);
+
+                ret.Append(toAppend);
             }
+
             ret.Append('\n');
         }
+
         return ret.ToString();
     }
 
-    private static Matrix Sum(Matrix A, Matrix B)
+    private static Matrix Sum(Matrix a, Matrix b)
     {
-        if (A.CountColumn != B.CountColumn || A.CountRow != B.CountRow) throw new Exception("Matrices should have equal size");
-        Matrix C = new Matrix(A.CountRow, A.CountColumn);
-        for (int i = 0; i < C.CountRow; i++)
-            for (int j = 0; j < C.CountColumn; j++)
-                C[i, j] = A[i, j] + B[i, j];
-        return C;
-    }
-
-    private static Matrix Subtract(Matrix A, Matrix B)
-    {
-        if (A.CountColumn != B.CountColumn || A.CountRow != B.CountRow) throw new Exception("Matrices should have equal size");
-        Matrix C = new Matrix(A.CountRow, A.CountColumn);
-        for (int i = 0; i < C.CountRow; i++)
-            for (int j = 0; j < C.CountColumn; j++)
-                C[i, j] = A[i, j] - B[i, j];
-        return C;
-    }
-
-    private static Matrix Multiply(Matrix A, Matrix B)
-    {
-        if (A.CountColumn != B.CountRow) throw new Exception("There should be as many rows in the first matrix as there are columns in the second one");
-        Matrix C = new Matrix(A.CountRow, B.CountColumn);
-        for (int i = 0; i < C.CountRow; i++)
-            for (int j = 0; j < C.CountColumn; j++)
-                for (int k = 0; k < B.CountRow; k++)
-                    C[i, j] += A[i, k] * B[k, j];
-        return C;
-    }
-
-    private static Matrix MultiplyByNumber(Matrix A, int b)
-    {
-        Matrix B = new Matrix(A.CountRow, A.CountColumn);
-        for (int i = 0; i < A.CountRow; i++)
-            for (int j = 0; j < A.CountColumn; j++)
-                B[i, j] = A[i, j] * b;
-        return B;
-    }
-
-    private static Matrix MultiplyByNumber(Matrix A, decimal b)
-    {
-        Matrix B = new Matrix(A.CountRow, A.CountColumn);
-        for (int i = 0; i < A.CountRow; i++)
-            for (int j = 0; j < A.CountColumn; j++)
-                B[i, j] = A[i, j] * b;
-        return B;
-    }
-    
-    private static Matrix MultiplyByNumber(Matrix A, double b)
-    {
-        Matrix B = new Matrix(A.CountRow, A.CountColumn);
-        for (int i = 0; i < A.CountRow; i++)
-            for (int j = 0; j < A.CountColumn; j++)
-                B[i, j] = A[i, j] * (decimal)b;
-        return B;
-    }
-
-    public static Matrix Pow(Matrix A, int n)
-    {
-        if (n < 1) throw new Exception("Power should be bigger than one");
-        Matrix B = A;
-        for (int i = 0; i < n - 1; i++)
-            A *= B;
-        return A;
-    }
-
-    public static Matrix SqrMinor(Matrix A, int row, int column)
-    {
-        if (A.CountRow != A.CountColumn) throw new Exception("Matrix should be square");
-        if (A.CountRow == 1) throw new Exception("Matrix should be bigger than 1x1");
-        Matrix result = new Matrix(A.CountRow-1, A.CountColumn-1);
-        int m = 0, k;
-        for (int i = 0; i < A.CountRow; i++)
-        {
-            if (i == row) continue;
-            k = 0;
-            for (int j = 0; j < A.CountColumn; j++)
-            {
-                if (j == column) continue;
-                result[m, k++] = A[i, j];
-            }
-            m++;
-        }
+        if (a.CountColumn != b.CountColumn || a.CountRow != b.CountRow)
+            throw new Exception("Matrices should have equal size");
+        var result = new Matrix(a.CountRow, a.CountColumn);
+        for (var i = 0; i < result.CountRow; i++)
+        for (var j = 0; j < result.CountColumn; j++)
+            result[i, j] = a[i, j] + b[i, j];
         return result;
     }
-    public static Matrix InverseMatrix(Matrix A)
+
+    private static Matrix Subtract(Matrix a, Matrix b)
     {
-        decimal det = Determinant(A);
-        if (det == 0)
-            throw new Exception("This matrix can't be inversed");
-        A = Transponse(A);
-        Matrix B = new Matrix(A.CountColumn, A.CountRow);
-        for (int i = 0; i < A.CountRow; i++)
-            for (int j = 0; j < A.CountColumn; j++)
-                B[i,j] = Cofactor(A, i, j);
-        A = B * (1 / det);
-        return A;
-    }
-    public static decimal Determinant(Matrix A)
-    {
-        if (A.CountRow != A.CountColumn) throw new Exception("Matrix should be square");
-        decimal Determinant = 0;
-        if (A.CountRow == 1) return A[0, 0];
-        else if (A.CountRow == 2) return A[0, 0] * A[1, 1] - A[1, 0] * A[0, 1];
-        int j = 0;
-        for (int i = 0; i < A.CountRow; i++)
-            Determinant += A[i, j] * Cofactor(A, i, j);
-        return Determinant;
+        if (a.CountColumn != b.CountColumn || a.CountRow != b.CountRow)
+            throw new Exception("Matrices should have equal size");
+        var result = new Matrix(a.CountRow, a.CountColumn);
+        for (var i = 0; i < result.CountRow; i++)
+        for (var j = 0; j < result.CountColumn; j++)
+            result[i, j] = a[i, j] - b[i, j];
+        return result;
     }
 
-    public static Matrix Transponse(Matrix A)
+    private static Matrix Multiply(Matrix a, Matrix b)
     {
-        Matrix B = new Matrix(A.CountColumn, A.CountRow);
-        for (int i = 0; i < B.CountRow; i++)
-            for (int j = 0; j < B.CountColumn; j++)
-                B[i, j] = A[j, i];
-        return B;
+        if (a.CountColumn != b.CountRow)
+            throw new Exception(
+                "There should be as many rows in the first matrix as there are columns in the second one");
+        var result = new Matrix(a.CountRow, b.CountColumn);
+        for (var i = 0; i < result.CountRow; i++)
+        for (var j = 0; j < result.CountColumn; j++)
+        for (var k = 0; k < b.CountRow; k++)
+            result[i, j] += a[i, k] * b[k, j];
+        return result;
     }
-    public static decimal Cofactor(Matrix A, int Row, int Column) => (decimal)Math.Pow(-1, Row + Column + 2) * Determinant(SqrMinor(A, Row, Column));
-    public static Matrix operator *(Matrix A, Matrix B) => Multiply(A, B);
-    public static Matrix operator *(Matrix A, int b) => MultiplyByNumber(A, b);
-    public static Matrix operator *(Matrix A, decimal b) => MultiplyByNumber(A, b);
-    public static Matrix operator *(Matrix A, double b) => MultiplyByNumber(A, b);
-    public static Matrix operator +(Matrix A, Matrix B) => Sum(A, B);
-    public static Matrix operator -(Matrix A, Matrix B) => Subtract(A, B);
+
+    private static Matrix MultiplyByNumber(Matrix a, int b)
+    {
+        var result = new Matrix(a.CountRow, a.CountColumn);
+        for (var i = 0; i < a.CountRow; i++)
+        for (var j = 0; j < a.CountColumn; j++)
+            result[i, j] = a[i, j] * b;
+        return result;
+    }
+
+    private static Matrix MultiplyByNumber(Matrix a, decimal b)
+    {
+        var result = new Matrix(a.CountRow, a.CountColumn);
+        for (var i = 0; i < a.CountRow; i++)
+        for (var j = 0; j < a.CountColumn; j++)
+            result[i, j] = a[i, j] * b;
+        return result;
+    }
+
+    private static Matrix MultiplyByNumber(Matrix a, double b)
+    {
+        var result = new Matrix(a.CountRow, a.CountColumn);
+        for (var i = 0; i < a.CountRow; i++)
+        for (var j = 0; j < a.CountColumn; j++)
+            result[i, j] = a[i, j] * (decimal)b;
+        return result;
+    }
+
+    public static Matrix Pow(Matrix a, int n)
+    {
+        if (n < 1) throw new Exception("Power should be bigger than one");
+        var result = a;
+        for (var i = 0; i < n - 1; i++)
+            a *= result;
+        return a;
+    }
+
+    public static Matrix SqrMinor(Matrix a, int row, int column)
+    {
+        if (a.CountRow != a.CountColumn) throw new Exception("Matrix should be square");
+        if (a.CountRow == 1) throw new Exception("Matrix should be bigger than 1x1");
+        var result = new Matrix(a.CountRow - 1, a.CountColumn - 1);
+        var m = 0;
+        for (var i = 0; i < a.CountRow; i++)
+        {
+            if (i == row) continue;
+            var k = 0;
+            for (var j = 0; j < a.CountColumn; j++)
+            {
+                if (j == column) continue;
+                result[m, k++] = a[i, j];
+            }
+
+            m++;
+        }
+
+        return result;
+    }
+
+    public static Matrix InverseMatrix(Matrix a)
+    {
+        var det = Determinant(a);
+        if (det == 0)
+            throw new Exception("This matrix can't be inversed");
+        a = Transpose(a);
+        var result = new Matrix(a.CountColumn, a.CountRow);
+        for (var i = 0; i < a.CountRow; i++)
+        for (var j = 0; j < a.CountColumn; j++)
+            result[i, j] = Cofactor(a, i, j);
+        a = result * (1 / det);
+        return a;
+    }
+
+    public static decimal Determinant(Matrix a)
+    {
+        if (a.CountRow != a.CountColumn) throw new Exception("Matrix should be square");
+        decimal determinant = 0;
+        switch (a.CountRow)
+        {
+            case 1:
+                return a[0, 0];
+            case 2:
+                return a[0, 0] * a[1, 1] - a[1, 0] * a[0, 1];
+        }
+        var j = 0;
+        for (var i = 0; i < a.CountRow; i++)
+            determinant += a[i, j] * Cofactor(a, i, j);
+        return determinant;
+    }
+
+    public static Matrix Transpose(Matrix a)
+    {
+        var result = new Matrix(a.CountColumn, a.CountRow);
+        for (var i = 0; i < result.CountRow; i++)
+        for (var j = 0; j < result.CountColumn; j++)
+            result[i, j] = a[j, i];
+        return result;
+    }
+
+    public static decimal Cofactor(Matrix a, int row, int column) =>
+        (decimal)Math.Pow(-1, row + column + 2) * Determinant(SqrMinor(a, row, column));
+
+    public static Matrix operator *(Matrix a, Matrix b) => Multiply(a, b);
+    public static Matrix operator *(Matrix a, int b) => MultiplyByNumber(a, b);
+    public static Matrix operator *(Matrix a, decimal b) => MultiplyByNumber(a, b);
+    public static Matrix operator *(Matrix a, double b) => MultiplyByNumber(a, b);
+    public static Matrix operator +(Matrix a, Matrix b) => Sum(a, b);
+    public static Matrix operator -(Matrix a, Matrix b) => Subtract(a, b);
 }

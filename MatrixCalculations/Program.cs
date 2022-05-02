@@ -26,7 +26,7 @@ class Program
         Console.WriteLine();
         Console.WriteLine($"m1^10 \n{Matrix.Pow(m1, 10)}");
         Console.WriteLine();
-        Console.WriteLine($"m1 transpose \n{Matrix.Transponse(m1)}");
+        Console.WriteLine($"m1 transpose \n{Matrix.Transpose(m1)}");
         Console.WriteLine();
         Console.WriteLine($"m1 + m2\n{m2 + m1}");
         Console.WriteLine();
